@@ -1,5 +1,5 @@
 //Aluno: Yovany Marroquin da Cunha - 115210445
-//Roteiro 2
+//Roteiro 4 - Parte 1
 
 // DESCRIPTION: Verilator: Systemverilog example module
 // with interface to switch buttons, LEDs, LCD and register display
@@ -42,51 +42,38 @@ module top(input  logic clk_2,
     lcd_b <= {SWI, 56'hFEDCBA09876543};
   end
 
-  /*************Problema 1*************/
-  logic [1:0] entrada_1;
-  logic [1:0] entrada_2;
-
-  parameter umidade_adequada = 'b00000000;
-  parameter area0_baixa = 'b00111111;
-  parameter area1_baixa = 'b00000110;
-  parameter area10_baixa = 'b01011011;
-
-  always_comb entrada_1 <= SWI[0];
-  always_comb entrada_2 <= SWI[1];
+  logic serial_input;
+  logic [3:0] parallel_input;
+  logic [3:0] data_out;
+  logic reset, input_type;
 
   always_comb begin
-    if ((entrada_1 == 0) & (entrada_2 == 0)) begin
-      SEG <= umidade_adequada;
-    end
-
-    else if ((entrada_1 == 0) & (entrada_2 == 1)) begin
-      SEG <= area1_baixa;
-    end
-
-    else if ((entrada_1 == 1) & (entrada_2 == 0)) begin
-      SEG <= area0_baixa;
-    end
-
-    else SEG <= area10_baixa;
+    serial_input   <= SWI[3];
+    parallel_input <= SWI[7:4];
+    reset          <= SWI[1];
+    input_type     <= SWI[2];
   end
 
-  /*************Problema 2*************/
-  logic [1:0] entrada_A;
-  logic [1:0] entrada_B;
-  logic [1:0] entrada_escolha;
+  always_ff @( posedge reset or posedge clk_2 ) begin
+    if (reset) begin
+      data_out <= 0;
+    end
+    
+    else if (input_type) begin
+      data_out <= parallel_input;
+    end
 
-  always_comb entrada_A <= SWI[7:6];
-  always_comb entrada_B <= SWI[5:4];
-
-  always_comb entrada_escolha <= SWI[3];
+    else begin
+      data_out[3] <= serial_input;
+      data_out[2] <= data_out[3];
+      data_out[1] <= data_out[2];
+      data_out[0] <= data_out[1];
+    end
+  end
 
   always_comb begin
-    if (entrada_escolha == 0) begin
-      LED[7:6] <= entrada_A;
-    end
-
-    else LED[7:6] <= entrada_B;
+    LED[0]   <= clk_2;
+    LED[7:4] <= data_out;
   end
-
 
 endmodule

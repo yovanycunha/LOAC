@@ -1,5 +1,5 @@
 //Aluno: Yovany Marroquin da Cunha - 115210445
-//Roteiro 2
+//Roteiro 4 - Parte 3
 
 // DESCRIPTION: Verilator: Systemverilog example module
 // with interface to switch buttons, LEDs, LCD and register display
@@ -42,51 +42,19 @@ module top(input  logic clk_2,
     lcd_b <= {SWI, 56'hFEDCBA09876543};
   end
 
-  /*************Problema 1*************/
-  logic [1:0] entrada_1;
-  logic [1:0] entrada_2;
+  logic [1:0] address;
+  logic [3:0] data_out;
 
-  parameter umidade_adequada = 'b00000000;
-  parameter area0_baixa = 'b00111111;
-  parameter area1_baixa = 'b00000110;
-  parameter area10_baixa = 'b01011011;
-
-  always_comb entrada_1 <= SWI[0];
-  always_comb entrada_2 <= SWI[1];
+  always_comb address <= SWI[3:2];
 
   always_comb begin
-    if ((entrada_1 == 0) & (entrada_2 == 0)) begin
-      SEG <= umidade_adequada;
-    end
-
-    else if ((entrada_1 == 0) & (entrada_2 == 1)) begin
-      SEG <= area1_baixa;
-    end
-
-    else if ((entrada_1 == 1) & (entrada_2 == 0)) begin
-      SEG <= area0_baixa;
-    end
-
-    else SEG <= area10_baixa;
+    case (address)
+      2'b00: data_out = 4'b0011;
+      2'b01: data_out = 4'b0010;
+      2'b10: data_out = 4'b1001;
+      2'b11: data_out = 4'b1100;
+    endcase
   end
 
-  /*************Problema 2*************/
-  logic [1:0] entrada_A;
-  logic [1:0] entrada_B;
-  logic [1:0] entrada_escolha;
-
-  always_comb entrada_A <= SWI[7:6];
-  always_comb entrada_B <= SWI[5:4];
-
-  always_comb entrada_escolha <= SWI[3];
-
-  always_comb begin
-    if (entrada_escolha == 0) begin
-      LED[7:6] <= entrada_A;
-    end
-
-    else LED[7:6] <= entrada_B;
-  end
-
-
+  always_comb LED[7:4] <= data_out;
 endmodule
