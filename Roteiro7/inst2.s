@@ -1,14 +1,8 @@
 .text
 .globl main
 main:
-        addi x1, x0, 1
-        addi x2, x0, 1
-        addi x3, x0, 5
-loop:
-        beq x2, x3, end
-        mul x1, x1, x2
-        addi x2, x2, 1
-        j loop
-
-end:
-        add a0, x1, x0
+        addi x11, x0, 0xFE
+        addi x12, x0, 0x000
+        lui x12, 0x10000
+        sw x11, 12 (x12)
+        lw x10, 12 (x12)
